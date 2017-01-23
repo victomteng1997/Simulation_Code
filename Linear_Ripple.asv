@@ -1,0 +1,9 @@
+function [ ripple ] = Linear_Ripple(wp,ws,type,n )
+%Return the Linear Ripple in the desired region
+% wp, ws are the boundary of the region respectively
+matrix = zeros(length(gd),1);
+
+
+
+end
+
