@@ -39,14 +39,18 @@ while N_red <= (2/3*N_fir)
         
         %2 linear ripple
         %function Linear_Ripple gives the linear ripple in specific region
-        psband1 = Linear_Ripple(0,0.4, 'pass',num_sam);
-        stband1 = Linear_Ripple(0.6,1,'stop',num_sam);
+        psband1 = Linear_Ripple(0,0.4, 'pass',num_sam,IIRcoe_ini,tau);
+        stband1 = Linear_Ripple(0.6,1,'stop',num_sam,IIRcoe_ini,tau);
+        %one more situation should be added in here, which is the
+        %transition band
+        
+        %3 gradient of deviation of group delay
+        ini_gra_dev_gd_ini = Gra_Dev_Group_delay(IIRcoe_ini(1),IIRcoe_ini(2),num_sam,e_tau_ini,tau)
+      
         
     
     
-    
         
-    
     
     
     end
