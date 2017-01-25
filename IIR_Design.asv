@@ -46,12 +46,7 @@ while N_red <= (2/3*N_fir)
         
         %3 gradient of deviation of group delay
         ini_gra_dev_gd_ini = Gra_Dev_Group_delay(IIRcoe_ini(1),IIRcoe_ini(2),num_sam,e_tau_ini,tau)
-        
-        %4 gradient of deviation of linear ripple
-        
-        %for passband
-        
-        %for stopband
+        ini_gra_lin_ri
       
         
     
