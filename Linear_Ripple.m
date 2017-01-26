@@ -1,4 +1,4 @@
-function [ ripple ] = Linear_Ripple(wp,ws,type,n,coe,tau)
+function [ ripple ] = Linear_Ripple(wp,ws,type,n,num,den,tau)
 %Return the Linear Ripple in the desired region
 % wp, ws are the boundary of the region respectively
 matrix = zeros(n,1);             %the inital matrix with all 0 in
@@ -12,7 +12,7 @@ else
 end
 e_point = ceil(ws*n);
 
-[h,w] = freqz(coe(1),coe(2),n);
+[h,w] = freqz(num,den,n);
 
 if strcmp(type,'pass')
     for i = s_point:e_point
