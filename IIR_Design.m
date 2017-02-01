@@ -47,11 +47,21 @@ while N_red <= (2/3*N_fir)
         ini_gra_dev_gd_ini = Gra_Dev_Group_delay(ini_num,ini_den,num_sam,e_tau_ini,tau)
         
         %4 gradient of deviation of linear ripple
+        %passband 0-0.4
+        pass_gra_dev = Deviation_Ripple(0,0.4, 'pass',num_sam,IIRcoe_ini,tau);
+        %stopband 0.6-1
+        end_gra_dev = Deviation_Ripple(0.6,1, 'pass',num_sam,IIRcoe_ini,tau);
         
-        %for passband
+        %5 gradient of Phi, stability calculation
+        %the function is unfinished due to some mathematical problems
+        while 1
+            %Solve the convex maximizing problem
+            %firstly write the objective function
+            f=@(deltx) = 
+            PROBLEM  = createOptimProblem('fmincon','objective',
         
-        %for stopband
-      
+        
+        
         
     
     
