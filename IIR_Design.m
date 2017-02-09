@@ -57,8 +57,9 @@ while N_red <= (2/3*N_fir)
         while 1
             %Solve the convex maximizing problem
             %firstly write the objective function
-            f=@(deltx) = 
-            PROBLEM  = createOptimProblem('fmincon','objective',
+            gs = GlobalSearch;
+            %calculate i_area, j_area
+            problem = createOptimProblem('fmincon','objective',@(x)objective_deltax(x,i_area,j_area,e_tau,dev_e_tau,lambada_p, lambada_s),;
         
         
         
