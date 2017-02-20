@@ -77,13 +77,13 @@ while N_red <= (2/3*N_fir)
         while 1
             %Solve the convex maximizing problem
             %firstly write the objective function
-            x_guess = zeros(1,length(IIRcoe_ini));
+            x_guess = zeros(1.length(
             A = []; b = [];      %linear constraints
             Aeq = []; beq = [];  %equality constraints
             lb = []; ub = [];    %lower and upper bound constraints
-            options = optimoptions(@fmincon);
-            %in most cases those are not useful
-            best_x = fmincon( @(x)objective, x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options);
+            nonlcon = [];        %non-linear constraints
+            options = [];        %options
+            best_x = fmincon( @(x)objective(x), x_guess, A, b, Aeq, beq, lb, ub, nonlcon, options);
 
         
         end

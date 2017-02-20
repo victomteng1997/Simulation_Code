@@ -23,9 +23,8 @@ elseif strcmp(type,'stop')
         matrix(i,:) = h(i);
     end    
 elseif strcmp(type,'tran')
-    for i = s_point:e_point
-        matrix(i,:) = h(i);
-    end    
+    fprintf('Wrong calculation region type')
+end
 else 
     fprintf('Wrong calculation region type')
 end
