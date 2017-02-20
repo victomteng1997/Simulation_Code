@@ -84,7 +84,10 @@ while N_red <= (2/3*N_fir)
             options = optimoptions(@fmincon);
             %in most cases those are not useful
             best_x = fmincon( @(x)objective, x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options);
-
+            
+            %calculate new performances
+            %1. deviation of group delay
+            if 
         
         end
         
