@@ -1,4 +1,4 @@
-function [ ripple ] = Get_ripple( wp, ws, num,den)
+function [ ripple ] = Get_ripple( wp, ws, num,den,num_sam = 3140)
 %Get the ripple in the given region
 
 %{
@@ -9,8 +9,8 @@ This MATLAB function returns the n-point frequency response vector, h, and the
 
 %ws and wp should be normalized frequency (0 to 1)
 
-[h,w] = freqz(num,den,3140);
-checked_region = h(ws*3.14*1000+1:wp*3.14*1000,:);
+[h,w] = freqz(num,den,num_sam);
+checked_region = h(ws*num_sam+1:wp*num_sam,:);
 ripple = max(checked_region) - min(checked_region);
 
 

@@ -48,12 +48,12 @@ while N_red <= (2/3*N_fir)
         e_tau_ini =  gd_ini - matrix;
         g_etau = e_tau_ini;
         
-        
+        IIRcoe_ini = [ini_num,ini_den];  %I didn't consider the dimension problem here. Remain to be tested
         %2 linear ripple
         %function Linear_Ripple gives the linear ripple in specific region
-        psband1 = Linear_Ripple(0,0.4, 'pass',num_sam,IIRcoe_ini,tau);
-        trband1 = Linear_Ripple(0.4,0.6,'tran',num_sam,IIRcoe_ini,tau);
-        stband1 = Linear_Ripple(0.6,1,'stop',num_sam,IIRcoe_ini,tau);
+        psband1 = Linear_Ripple(0,0.4, 'pass',num_sam,ini_num,ini_den,tau);
+        trband1 = Linear_Ripple(0.4,0.6,'tran',num_sam,ini_num,ini_den,tau);
+        stband1 = Linear_Ripple(0.6,1,'stop',num_sam,ini_num,ini_den,tau);
         g_lr_pass = psband1;
         g_lr_tran = trband1;
         g_lr_stop = stband1;
@@ -66,36 +66,62 @@ while N_red <= (2/3*N_fir)
          
         %4 gradient of deviation of linear ripple
         %passband 0-0.4
-        pass_gra_dev = Deviation_Ripple(0,0.4, 'pass',num_sam,IIRcoe_ini,tau);
+        pass_gra_dev = Deviation_Ripple(0,0.4, 'pass',num_sam,ini_num,ini_den,tau);
         g_gradient_lr_pass = pass_gra_dev;
         %stopband 0.6-1
-        end_gra_dev = Deviation_Ripple(0.6,1, 'pass',num_sam,IIRcoe_ini,tau);
+        end_gra_dev = Deviation_Ripple(0.6,1, 'pass',num_sam,ini_num,ini_den,tau);
         g_gradient_lr_stop = end_gra_dev;
         
         %5 gradient of Phi, stability calculation
         %the function is unfinished due to some mathematical problems
+        
+        
+        %let IIRcoe = IIRcoe_ini
+        IIRcoe = IIRcoe_ini;
+        IIRnum = ini_num;
+        IIRden = ini_den;
         while 1
             %Solve the convex maximizing problem
             %firstly write the objective function
-            x_guess = zeros(1,length(IIRcoe_ini));
+            x_guess = zeros(1,length(IIRcoe));
             A = []; b = [];      %linear constraints
             Aeq = []; beq = [];  %equality constraints
             lb = []; ub = [];    %lower and upper bound constraints
             options = optimoptions(@fmincon);
             %in most cases those are not useful
-            best_x = fmincon( @(x)objective, x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options);
+            delta_x = fmincon( @(x)objective, x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options);
             
             %calculate new performances
+            IIRcoe = IIRcoe + delta_x;
+            new_num = IIRcoe(1:length(IIRnum));
+            new_den = IIRcoe(length(IIRnum)+1:length(IIRcoe));
             %1. deviation of group delay
-            if 
-        
-        end
-        
-    
-    
-        
-    
-    
+            [new_gd,new_w] = grpdelay(new_num,new_den, num_sam);
+            new_etau = new_gd - matrix;
+            %2. gradient of deviation of group delay
+            new_gra_dev_gd_ini = Gra_Dev_Group_delay(new_num,new_den,num_sam,new_etau,tau); 
+            if (norm(g_etau,inf) - norm(new_etau,inf))/(norm(g_etau,inf) - norm(g_etau+g_dev_etau,inf)) < 0.5
+                rho = 0.5*rho;
+            else
+                IIRnum = new_num;
+                IIRden = new_den;
+                rho = 1.1*rho;
+                %calculate new ripple
+                pass_ripple = Get_ripple(0,0.4,IIRnum,IIRden);
+                stop_ripple = Get_ripple(0.6,1,IIRnum,IIRden);
+                new_lambada_p = 10^5 * pass_ripple;
+                new_lambada_s = 10^5 * stop_ripple;
+                if abs(new_lambada_p-g_lambada_p)<1e-4 && abs(new_lambada_s-g_lambada_s)<1e-4
+                    %calculate full adder cost and Q_tau
+                        %if acceptable
+                        %update IIRcoe_best
+                        %end if
+                end
+            break
+            end
+        end   
     end
+    N_red = N_red + 1;
+    %return IIRcoe_best
 end
 

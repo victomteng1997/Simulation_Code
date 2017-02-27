@@ -18,6 +18,10 @@ Global part:
     lambada_p: g_lambada_p
     lambada_s: g_lambada_s
 
+IIR_Design:
+    After solving the global optimization problem, new coe and previous
+    coes are all needed at the same time. Therefore, new coe will be added
+    by new_ at the front of variable names.
 
 
 
