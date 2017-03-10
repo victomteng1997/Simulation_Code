@@ -1,4 +1,4 @@
-function [ num_best, den_best ] = IIR_Design( N_red, Rip_pb, Rip_sb, f_ct, tau, r_max )
+function [ num_best, den_best ] = IIR_Design( N_red, Rip_pb, Rip_sb, f_ct, tau, r_max, b) %b is the fir filter initial coe
 
 %Firstly indicate those variables based on the calculation, and are needed
 %in later result
@@ -19,6 +19,10 @@ minpbgain = 0.999;
 maxsbgain = 0.001;
 %}
 
+
+
+
+
 %  ModelReduction is not finished yet
 
 %  Here the given example is a low pass filter. All the other situations
@@ -26,6 +30,8 @@ maxsbgain = 0.001;
 
 
 N_fir = 2*tau;
+
+
 while N_red <= (2/3*N_fir)
     rho = 0.01;
     %the following part is about getting the initial iir filter coef

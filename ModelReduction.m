@@ -1,8 +1,16 @@
-function [ numerator,denominator] = ModelReduction( A,b,c,d,Ts )
+function [ numerator,denominator] = ModelReduction( N_red, N_fir, Rip_pb, Rip_sb, f_ct) %f_ct only available for bandpass filter
+%here i set Rip_pb = 0.5, Rip_sb = 40
 %Model Reduction function 
 %Step 0: Generate the FIR filter 
 
-%here I need to put in a function to generate the intial system
+%Get inital fir filter
+lpFilt = designfilt('lowpassfir','PassbandFrequency',0.4, ...
+         'StopbandFrequency',0.6,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',40,'DesignMethod','kaiserwin');
+fvtool(lpFilt)
+
+%get the space state form
+[A,B,C,D] = ss(lpFilt);
 
 
 %Step 1: Compute the impulse-response gramian P asthe solution of the Lyapunov equation
@@ -12,7 +20,8 @@ A*X*A' - E*X*E' + B*B' = 0
 
 csys = canon(sys,type) transforms the linear model sys into a canonical state-space model csys. The argument type specifies whether csys is in modal or companion form.
 %}
-sys = ss(A,b,c,d,Ts);  %create the system
+Ts = 0.1; % specify the sampled time (unit: s)
+sys = ss(A,B,C,D,Ts);  %create the system
 sys_head = canon(sys,'modal');  %canonical realization
 A_head = sys_head.A;
 b_head = sys_head.b;
@@ -24,7 +33,7 @@ L = orthogonal_matrix(P);
 A_d = L\A_head*L;
 b_d = L\b_head;
 c_d = c_head*L;
-s_A = size(A_d);s_b = size(b_d);s_c = siza(c_d);
+s_A = size(A_d);s_b = size(b_d);s_c = size(c_d);
 
 A_m = A_d(1:ceil(0.5*s_A(1)),1:ceil(0.5*s_A(1)));    
 b_m = b_d(1:ceil(0.5*s_b(1)),:);
