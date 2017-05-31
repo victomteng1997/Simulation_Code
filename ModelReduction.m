@@ -3,14 +3,16 @@ function [ numerator,denominator] = ModelReduction( N_red, N_fir, Rip_pb, Rip_sb
 %Model Reduction function 
 %Step 0: Generate the FIR filter 
 
+%% personally i don't understand what's happening... but this file can only be run section by section
+
 %Get inital fir filter
-lpFilt = designfilt('lowpassfir','PassbandFrequency',0.4, ...
-         'StopbandFrequency',0.6,'PassbandRipple',0.5, ...
-         'StopbandAttenuation',40,'DesignMethod','kaiserwin');
-fvtool(lpFilt)
+hpFilt = designfilt('lowpassfir','PassbandFrequency',0.25, ...
+         'StopbandFrequency',0.35,'PassbandRipple',0.5, ...
+         'StopbandAttenuation',35,'DesignMethod','kaiserwin');
+fvtool(hpFilt);
 
 %get the space state form
-[A,B,C,D] = ss(lpFilt);
+[A,B,C,D] = ss(hpFilt);
 
 
 %Step 1: Compute the impulse-response gramian P asthe solution of the Lyapunov equation
@@ -29,7 +31,7 @@ c_head = sys_head.c;
 
 R = dlyapchol(transpose(A_head),transpose(c_head));        
 P = transpose(R)*R;                    %impulse-response gramian P               这里可能有问题，因为对dlyapchol这个函数的运行方式不太确定，不知道算出来的结果是R还是P
-L = orthogonal_matrix(P);
+L = orthogonal_matrix(P)
 A_d = L\A_head*L;
 b_d = L\b_head;
 c_d = c_head*L;
@@ -38,13 +40,16 @@ s_A = size(A_d);s_b = size(b_d);s_c = size(c_d);
 A_m = A_d(1:ceil(0.5*s_A(1)),1:ceil(0.5*s_A(1)));    
 b_m = b_d(1:ceil(0.5*s_b(1)),:);
 c_m = c_d(:,1:ceil(0.5*s_c(2)));
-d_m = d;                                                 % reduced state-space model 
+d_m = D;                                                 % reduced state-space model 
 
 [numerator,denominator] = ss2tf(A_m,b_m,c_m,d_m);
 
 
-
-
+%% To check the frequency response of the filter
+[h,w] = freqz(numerator,denominator,'whole',2001);
+plot(w/pi,20*log10(abs(h)))
+xlabel('Normalized Frequency (\times\pi rad/sample)')
+ylabel('Magnitude (dB)')
 
 
 end

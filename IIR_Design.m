@@ -10,20 +10,8 @@ g_sample_num = 314;
 g_pass_area = [0,0.4];
 g_tran_area = [0.4001 0.0599];
 g_stop_area = [0.6,1];
-%Proposed Design Algorithm
-%{
-wp = 0.4;
-ws = 0.6;
-maxpbgain = 1.001;
-minpbgain = 0.999;
-maxsbgain = 0.001;
-%}
 
 
-
-
-
-%  ModelReduction is not finished yet
 
 %  Here the given example is a low pass filter. All the other situations
 %  may be added in later
@@ -89,13 +77,15 @@ while N_red <= (2/3*N_fir)
         while 1
             %Solve the convex maximizing problem
             %firstly write the objective function
+            %objective function is not finished yet
+            
             x_guess = zeros(1,length(IIRcoe));
             A = []; b = [];      %linear constraints
             Aeq = []; beq = [];  %equality constraints
             lb = []; ub = [];    %lower and upper bound constraints
             options = optimoptions(@fmincon);
             %in most cases those are not useful
-            delta_x = fmincon( @(x)objective, x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options);
+            delta_x = fmincon( @(x)objective,x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options));
             
             %calculate new performances
             IIRcoe = IIRcoe + delta_x;

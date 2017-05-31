@@ -29,6 +29,15 @@ IIR_Design:
 %}
 
 
-%% version 1.0
-
+%% version 1.0 (unfinished yet£©
 %try to realize the function of the provided paper
+
+%version 1.0.1, 2017/3/11
+%{
+finish debuging of modelReduction function
+However, there are sveral problems.
+It seems like the modelreudction algorith provided cannot specific the
+order of the reduced IIR filter. Therefore a loop is needed to specify
+this to make sure that the final IIR coe order is acceptable.
+%}
+

@@ -17,7 +17,7 @@ for i = 1:length(num)             %firstly calculate num gradient
     dev = (new - matrix-initial)/0.0001;
     answer = [answer,dev];
 end
-for i = 1:length(den)             %Then calculate den gradient
+for i = 1:length(den)             %firstly calculate num gradient
     den(i) = den(i) + 0.0001;
     [new,w] = grpdelay(num,den,num_sam);
     den(i) = den(i) - 0.0001;

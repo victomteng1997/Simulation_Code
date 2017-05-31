@@ -1,6 +1,6 @@
-function [ ripple ] = Get_ripple( wp, ws, num,den,num_sam = 3140)
+function [ ripple ] = Get_ripple( wp, ws, num,den,num_sam)
 %Get the ripple in the given region
-
+num_sam = 3140;
 %{
 This MATLAB function returns the n-point frequency response vector, h, and the
     corresponding angular frequency vector, w, for the digital filter with numerator
