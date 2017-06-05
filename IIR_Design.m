@@ -40,6 +40,9 @@ while N_red <= (2/3*N_fir)
         matrix = zeros(num_sam,1);
         matrix(:,:) = tau;
         e_tau_ini =  gd_ini - matrix;
+        max_index = find(e_tau_ini==(max(e_tau_ini)));
+        min_index = find(e_tau_ini==(min(e_tau_ini)));
+        
         g_etau = e_tau_ini;
         
         IIRcoe_ini = [ini_num,ini_den];  %I didn't consider the dimension problem here. Remain to be tested
@@ -58,6 +61,8 @@ while N_red <= (2/3*N_fir)
         ini_gra_dev_gd_ini = Gra_Dev_Group_delay(ini_num,ini_den,num_sam,e_tau_ini,tau);
         g_dev_etau = ini_gra_dev_gd_ini;
          
+        %3.1 After this we import a very useful thing, sensitivity map:
+        s_map = get_smap(ini_gra_dev_gd_ini,max_index,min_index);
         %4 gradient of deviation of linear ripple
         %passband 0-0.4
         pass_gra_dev = Deviation_Ripple(0,0.4, 'pass',num_sam,ini_num,ini_den,tau);

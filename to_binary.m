@@ -6,14 +6,21 @@ function [result] = to_binary(vec,n)
 format is recoreded in this way:
                                   coe1  coe2 .......
 int part: p or n                [  1    (0 represents positive, 1
-negative)
+negative)                          n    (position of decimal point, 
+
+
+(for example, if the decimal number is 15.3233, the binary result should be
+
+0 4 1 1 1 1 0 1 ....... 4 represents that the decimal number is after the
+fourth binary digit, which is the "1" at the fourth position, so the binary
+number should be 1111.01.......
                                                                 
 
                                                                         ]
 %}
 
 len = length(vec);
-result = zeros(n+1,len);
+result = zeros(n+2,len);
 for c = 1:len
     data = vec(c);
     if data > 0
@@ -26,9 +33,10 @@ for c = 1:len
     
     dec_part = data - int_part;
     int_bi = de2bi(int_part)';
+    result(2,c) = length(int_bi);
+    result(3:(length(int_bi)+2),c) = int_bi;
     
-    result(2:(length(int_bi)+1),c) = int_bi;
-    for i = length(int_bi)+2:n+1
+    for i = length(int_bi)+3:n+2
         result(i) = floor(dec_part*2);
         dec_part = dec_part*2-floor(dec_part*2);
         

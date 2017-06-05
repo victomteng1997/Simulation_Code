@@ -60,3 +60,7 @@ while j < i:
     j += 1
 print best
 print best_coeff
+
+txt = open(r'F:\IIR filter\codes\Simulation_Code\result.txt','w')
+txt.write(best_coeff)
+txt.close()

@@ -27,7 +27,7 @@ end
 
 % A very important idea here:
 %{
-We need to get a sensitivity map, indicating each 
+Put sensitivity map here.
 %}
 
 end
