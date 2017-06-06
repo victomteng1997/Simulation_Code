@@ -100,13 +100,23 @@ while N_red <= (2/3*N_fir)
             [new_gd,new_w] = grpdelay(new_num,new_den, num_sam);
             new_etau = new_gd - matrix;
             %2. gradient of deviation of group delay
-            new_gra_dev_gd_ini = Gra_Dev_Group_delay(new_num,new_den,num_sam,new_etau,tau); 
+            new_gra_dev_gd = Gra_Dev_Group_delay(new_num,new_den,num_sam,new_etau,tau); 
             if (norm(g_etau,inf) - norm(new_etau,inf))/(norm(g_etau,inf) - norm(g_etau+g_dev_etau,inf)) < 0.5
                 rho = 0.5*rho;
             else
                 IIRnum = new_num;
                 IIRden = new_den;
                 rho = 1.1*rho;
+                %Get the current sensitivity map, current coeffs
+                max_index = find(new_etau==(max(new_etau)));
+                min_index = find(new_etau==(min(new_etau)));
+                s_map = get_smap(new_gra_dev_gd,max_index,min_index);
+                
+                %Call python code here.
+                System(Python, random_dotting.py);
+                
+                
+                
                 %calculate new ripple
                 pass_ripple = Get_ripple(0,0.4,IIRnum,IIRden);
                 stop_ripple = Get_ripple(0.6,1,IIRnum,IIRden);
