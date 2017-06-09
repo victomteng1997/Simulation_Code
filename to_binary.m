@@ -37,7 +37,7 @@ for c = 1:len
     result(3:(length(int_bi)+2),c) = int_bi;
     
     for i = length(int_bi)+3:n+2
-        result(i) = floor(dec_part*2);
+        result(i,c) = floor(dec_part*2);
         dec_part = dec_part*2-floor(dec_part*2);
         
     end

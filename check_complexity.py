@@ -1,4 +1,5 @@
-txt = open(r'F:\IIR filter\codes\Simulation_Code\coeff.txt','r')
+print "start checking complexity"
+txt = open(r'F:\IIR filter\codes\Simulation_Code\rand_coeff.txt','r')
 content = txt.read()
 txt.close()
 
@@ -60,6 +61,10 @@ while j < i:
     j += 1
 print best
 print best_block
-txt = open(r'F:\IIR filter\codes\Simulation_Code\result.txt','w')
+txt = open(r'F:\IIR filter\codes\Simulation_Code\rand_result.txt','w')
 txt.write(best_coeff)
 txt.close()
+
+
+
+
