@@ -1,5 +1,5 @@
-function [ num_best, den_best ] = IIR_Design( N_red, Rip_pb, Rip_sb, f_ct, tau, r_max, b) %b is the fir filter initial coe
-
+function [ num_best, den_best ] = IIR_Design( N_red, Rip_pb, Rip_sb, f_ct, tau, r_max) %b is the fir filter initial coe
+tau = 20;
 %Firstly indicate those variables based on the calculation, and are needed
 %in later result
 global g_etau g_dev_etau g_lr_pass g_lr_tran g_lr_stop g_gradient_lr_pass g_gradient_lr_stop
