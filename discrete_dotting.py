@@ -23,7 +23,7 @@ for line in open('coeff.txt'):
 coe_txt.close()
 
 count = 0
-digits = 3 
+digits = 4 
 
 coeff_status = 0
 search_list = []
@@ -76,7 +76,7 @@ Any common blocks appear in one coeff increase the efficiency. (more 1, more eff
 In the following code, evaluate will give how many FA/FF cost can be saved (briefly). 
 """
 ###   Part 3: Random dotting
-while (coeff_status <= 1000000):
+while (coeff_status <= 1000):
     coe_str = ''
     exp_coe = list()
     binary = ''
@@ -114,7 +114,7 @@ while (coeff_status <= 1000000):
     coe_len = len(exp_coe[0])
     # Step 1, evaluate which common block should be replaced in the first place.
     testing = coe_str
-    for block in search_list:
+    for block in reversed(search_list):
            #Generally, searching longer blocks in the first place will bring a better result, as shorter blocks may cut the longer blocks
         block_len = len(block)
         tar = 'x'*block_len
