@@ -6,7 +6,7 @@ function [ result ] = dev_arg_of_den(r, a)
 syms w
 f(w) = 0;
 for i = 1:length(a)
-    f(w)= f(w) + a(i)*((r*exp(1j*w))^(-i));
+    f(w)= f(w) + a(i)*((r*exp(1j*w))^(-(i-1)));
 end
 f(w) = argument(f(w));
 
