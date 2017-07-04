@@ -6,14 +6,15 @@ global g_etau g_dev_etau
 global g_lr_pass g_lr_stop g_gradient_lr_pass g_gradient_lr_stop
 global g_sample_num g_pass_area 
 global g_lambada_p g_lambada_s
-
-
-all = norm((g_etau + g_dev_etau*x),inf);
-first = all((g_sample_num*g_pass_area(1)):(g_sample_num*g_pass_area(2)),:);
+p_etau = g_etau(1:round(0.4*314));
+p_dev_etau = g_dev_etau(1:round(0.4*314),:);
+all = max(abs((p_etau + p_dev_etau*x),inf));
+disp(all)
+% first = all((g_sample_num*g_pass_area(1)):(g_sample_num*g_pass_area(2)),:);
 second = g_lambada_p * (g_lr_pass + g_gradient_lr_pass * x);
 third = g_lambada_s*(g_lr_stop + g_gradient_lr_stop*x);
-output = norm(first,inf)+norm(second,inf)+norm(third,inf);
-
+%output = all+max(abs(second,inf))+max(abs(third,inf));
+output = all;
 
 end
 

@@ -1,5 +1,8 @@
-function [ num_best, den_best ] = IIR_Design( N_red, Rip_pb, Rip_sb, f_ct, tau, r_max) %b is the fir filter initial coe
-tau = 20;
+function [ IIRcoe_best ] = IIR_Design(num_sam,tau,Rip_pb, Rip_sb) %b is the fir filter initial coe
+tau = 10;
+num_sam = 314;       %number of sampling points
+addpath 'c:\Program Files\mosek\7\toolbox\r2013a' 
+addpath(genpath('F:\IIR filter\YALMIP-master'))
 %Firstly indicate those variables based on the calculation, and are needed
 %in later result
 global g_etau g_dev_etau g_lr_pass g_lr_tran g_lr_stop g_gradient_lr_pass g_gradient_lr_stop
@@ -18,23 +21,23 @@ g_stop_area = [0.6,1];
 
 
 N_fir = 2*tau;
-
+N_red = 11;
 
 while N_red <= (2/3*N_fir)
     rho = 0.01;
     %the following part is about getting the initial iir filter coef
     %before this, wp and ws are needed to be stated
     %hence, I added this part into Model Reduction
-    [ini_num,ini_den] = ModelReduction(N_red, N_fir, Rip_pb, Rip_sb, f_ct);             %2017/1/26 change ini_coe to ini_num and ini_den to minimize the dimensional problem
+    [ini_num,ini_den] = another_mr(N_red);             %2017/1/26 change ini_coe to ini_num and ini_den to minimize the dimensional problem
     %calculate ripple of inital IIR      here assume wp = 0.4, ws = 0.6
     Rip_pb0 = Get_ripple(0,0.4,ini_num,ini_den);
     Rip_sb0 = Get_ripple(0.6,1,ini_num,ini_den);
     g_lambada_p = 10^5 * Rip_pb0;
     g_lambada_s = 10^5 * Rip_sb0;
-    while rho > 10^(-4) && lambada_p <= 10^5 && lambada_s <= 10^5
+    while rho > 10^(-4) && g_lambada_p <= 10^5 && g_lambada_s <= 10^5
         %compute deviation of group delay, linear ripple, gradient of deviation of group delay, gradient of linear ripple and gradient of ¦µ for initial IIR filter
         %before all this, calculate the group delay first
-        num_sam = 314;       %number of sampling points
+        
         [gd_ini,w_ini] = grpdelay(ini_num,ini_den, num_sam);           %gd and w are the group delay response and respective frequency ,314 is the number of sampled points
         %1. deviation of group delay
         matrix = zeros(num_sam,1);
@@ -71,9 +74,6 @@ while N_red <= (2/3*N_fir)
         end_gra_dev = Deviation_Ripple(0.6,1, 'pass',num_sam,ini_num,ini_den,tau);
         g_gradient_lr_stop = end_gra_dev;
         
-        %5 gradient of Phi, stability calculation
-        %the function is unfinished due to some mathematical problems
-        
         
         %let IIRcoe = IIRcoe_ini
         IIRcoe = IIRcoe_ini;
@@ -81,17 +81,8 @@ while N_red <= (2/3*N_fir)
         IIRden = ini_den;
         while 1
             %Solve the convex maximizing problem
-            %firstly write the objective function
-            %objective function is not finished yet
-            
-            x_guess = zeros(1,length(IIRcoe));
-            A = []; b = [];      %linear constraints
-            Aeq = []; beq = [];  %equality constraints
-            lb = []; ub = [];    %lower and upper bound constraints
-            options = optimoptions(@fmincon);
-            %in most cases those are not useful
-            delta_x = fmincon( @(x)objective,x_guess, A, b, Aeq, beq, lb, ub, @(x)constraint, options));
-            
+            delta_x = mosek_optimzer(0.999,IIRden);
+            delta_x = transpose(delta_x);
             %calculate new performances
             IIRcoe = IIRcoe + delta_x;
             new_num = IIRcoe(1:length(IIRnum));
@@ -101,38 +92,80 @@ while N_red <= (2/3*N_fir)
             new_etau = new_gd - matrix;
             %2. gradient of deviation of group delay
             new_gra_dev_gd = Gra_Dev_Group_delay(new_num,new_den,num_sam,new_etau,tau); 
-            if (norm(g_etau,inf) - norm(new_etau,inf))/(norm(g_etau,inf) - norm(g_etau+g_dev_etau,inf)) < 0.5
+            %check passband only
+            c_etau = g_etau(1:round(0.4*num_sam));
+            cn_etau = new_etau(1:round(0.4*num_sam));
+            c_dev_etau = g_dev_etau(1:round(0.4*num_sam),:);
+            if (norm(c_etau,inf) - norm(cn_etau,inf))/(norm(c_etau,inf) - norm(cn_etau+c_dev_etau*transpose(delta_x),inf)) < 0.5
                 rho = 0.5*rho;
+                disp('situation 1');
+                disp(norm(c_etau,inf))
+                disp(norm(cn_etau,inf))
+                IIRcoe = IIRcoe - delta_x;
             else
+                disp('situation 2');
                 IIRnum = new_num;
                 IIRden = new_den;
+                disp(norm(c_etau,inf))
+                disp(norm(cn_etau,inf))
                 rho = 1.1*rho;
                 %Get the current sensitivity map, current coeffs
-                max_index = find(new_etau==(max(new_etau)));
-                min_index = find(new_etau==(min(new_etau)));
-                s_map = get_smap(new_gra_dev_gd,max_index,min_index);
+                %max_index = find(new_etau==(max(new_etau)));
+                %min_index = find(new_etau==(min(new_etau)));
+                %s_map = get_smap(new_gra_dev_gd,max_index,min_index);
                 
                 %Call python code here.
-                System(Python, random_dotting.py);
+                %System(Python, random_dotting.py);
                 
                 
                 
-                %calculate new ripple
+                % Recalculate everything
+                [gd,w] = grpdelay(IIRnum,IIRden, num_sam);           %gd and w are the group delay response and respective frequency ,314 is the number of sampled points
+                %1. deviation of group delay
+                matrix = zeros(num_sam,1);
+                matrix(:,:) = tau;
+                e_tau =  gd - matrix;
+                max_index = find(e_tau==(max(e_tau)));
+                min_index = find(e_tau==(min(e_tau)));
+
+                g_etau = e_tau;
+                %2 linear ripple
+                %function Linear_Ripple gives the linear ripple in specific region
+                psband1 = Linear_Ripple(0,0.4, 'pass',num_sam,IIRnum,IIRden,tau);
+                trband1 = Linear_Ripple(0.4,0.6,'tran',num_sam,IIRnum,IIRden,tau);
+                stband1 = Linear_Ripple(0.6,1,'stop',num_sam,IIRnum,IIRden,tau);
+                g_lr_pass = psband1;
+                g_lr_tran = trband1;
+                g_lr_stop = stband1;
+                %one more situation should be added in here, which is the
+                %transition band
+
+                %3 gradient of deviation of group delay
+                ini_gra_dev_gd = Gra_Dev_Group_delay(IIRnum,IIRden,num_sam,e_tau,tau);
+                g_dev_etau = ini_gra_dev_gd;
+
+                %3.1 After this we import a very useful thing, sensitivity map:
+                s_map = get_smap(ini_gra_dev_gd,max_index,min_index);
+                %4 gradient of deviation of linear ripple
+                %passband 0-0.4
+                pass_gra_dev = Deviation_Ripple(0,0.4, 'pass',num_sam,IIRnum,IIRden,tau);
+                g_gradient_lr_pass = pass_gra_dev;
+                %stopband 0.6-1
+                end_gra_dev = Deviation_Ripple(0.6,1, 'pass',num_sam,IIRnum,IIRden,tau);
+                g_gradient_lr_stop = end_gra_dev;
                 pass_ripple = Get_ripple(0,0.4,IIRnum,IIRden);
                 stop_ripple = Get_ripple(0.6,1,IIRnum,IIRden);
-                new_lambada_p = 10^5 * pass_ripple;
-                new_lambada_s = 10^5 * stop_ripple;
-                if abs(new_lambada_p-g_lambada_p)<1e-4 && abs(new_lambada_s-g_lambada_s)<1e-4
-                    %calculate full adder cost and Q_tau
-                        %if acceptable
-                        %update IIRcoe_best
-                        %end if
+                g_lambada_p = 10^5 * pass_ripple;
+                g_lambada_s = 10^5 * stop_ripple;
+                if abs(pass_ripple-Rip_pb)<1e-4 && abs(stop_ripple-Rip_sb)<1e-4
+                    IIRcoe_best = IIRcoe;
+                    disp('one best coeff generated');
+                    break
                 end
-            break
+            
             end
         end   
     end
     N_red = N_red + 1;
-    %return IIRcoe_best
 end
 

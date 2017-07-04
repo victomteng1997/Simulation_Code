@@ -16,7 +16,7 @@ e_point = ceil(ws*n);
 
 if strcmp(type,'pass')
     for i = s_point:e_point
-        matrix(i,:) = h(i) - exp(1i*(i/n*pi)*tau);
+        matrix(i,:) = h(i) - abs(exp(1i*(i/n*pi)*tau));
     end
 elseif strcmp(type,'stop')
     for i = s_point:e_point

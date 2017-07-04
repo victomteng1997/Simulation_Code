@@ -40,4 +40,10 @@ It seems like the modelreudction algorith provided cannot specific the
 order of the reduced IIR filter. Therefore a loop is needed to specify
 this to make sure that the final IIR coe order is acceptable.
 %}
-
+%% version 2.0 (basically finished);
+%{
+2017/7/04
+now one buttion calculation is supported.
+Please remember to change objective delta as well as all passband
+(stopband) info before a new round of optimization
+%}
