@@ -5,7 +5,7 @@ delta_x = sdpvar(2*length(ak),1);
 % define the constraints
 [c] = constraint_builder(delta_x);
 ceq = dev_arg_of_den(r, ak, delta_x(1:length(delta_x)/2));
-Constraints = [c(1) <= 0, ceq == 0];       % i delete c(2) <=0
+Constraints = [c(1) <= 0,  ceq == 0];       % i delete c(2) <=0
 % define the objective function
 Objective = objective_deltax(delta_x);
 % Set some options for YALMIP and solver

@@ -12,9 +12,9 @@ end
 g(w) = 0*w;
 left_mat = zeros(1, length(ak));
 for k = 1:length(ak)
-    disp(k)
+    %disp(k)
     g(w) = diff(angle(f(w) + delta_a*((r*exp(1j*w))^(-k-1))) - angle(f(w)))/delta_a;
-    disp(g(w))
+    %disp(g(w))
     trap = zeros(1,100);
     del = linspace(0,pi,100);
     for q = 1:100

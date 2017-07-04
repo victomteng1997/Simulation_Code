@@ -11,6 +11,7 @@ This MATLAB function returns the n-point frequency response vector, h, and the
 
 [h,w] = freqz(num,den,num_sam);
 checked_region = h(wp*num_sam+1:ws*num_sam,:);
+checked_region = abs(checked_region);
 ripple = max(checked_region) - min(checked_region);
 
 

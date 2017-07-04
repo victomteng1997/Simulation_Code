@@ -1,6 +1,6 @@
 function [c] = constraint_builder( delta_x)
 % Constraint for optimization problem
-global g_lr_tran rho
+global g_lr_tran rho 
 c(1) = norm(delta_x,2) - rho;
 c(2) = norm(g_lr_tran, inf) - 1;
 % ceq = all(dev_arg_of_den(r, a, ak) == 0); % TODO: value of r, a, ak need to be passed here

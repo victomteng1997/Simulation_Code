@@ -1,5 +1,5 @@
 %% Get a set of initial datatau = 20
-tau = 10;
+tau = 15;
 rho = 0.01;
 %Firstly indicate those variables based on the calculation, and are needed
 %in later result

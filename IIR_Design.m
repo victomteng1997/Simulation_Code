@@ -1,5 +1,5 @@
 function [ IIRcoe_best ] = IIR_Design(num_sam,tau,Rip_pb, Rip_sb) %b is the fir filter initial coe
-tau = 10;
+tau = 15;
 num_sam = 314;       %number of sampling points
 addpath 'c:\Program Files\mosek\7\toolbox\r2013a' 
 addpath(genpath('F:\IIR filter\YALMIP-master'))
@@ -24,6 +24,7 @@ N_fir = 2*tau;
 N_red = 11;
 
 while N_red <= (2/3*N_fir)
+    disp(N_red);
     rho = 0.01;
     %the following part is about getting the initial iir filter coef
     %before this, wp and ws are needed to be stated
@@ -32,8 +33,8 @@ while N_red <= (2/3*N_fir)
     %calculate ripple of inital IIR      here assume wp = 0.4, ws = 0.6
     Rip_pb0 = Get_ripple(0,0.4,ini_num,ini_den);
     Rip_sb0 = Get_ripple(0.6,1,ini_num,ini_den);
-    g_lambada_p = 10^5 * Rip_pb0;
-    g_lambada_s = 10^5 * Rip_sb0;
+    g_lambada_p = 100 * Rip_pb0;
+    g_lambada_s = 100 * Rip_sb0;
     while rho > 10^(-4) && g_lambada_p <= 10^5 && g_lambada_s <= 10^5
         %compute deviation of group delay, linear ripple, gradient of deviation of group delay, gradient of linear ripple and gradient of ¦µ for initial IIR filter
         %before all this, calculate the group delay first
@@ -43,6 +44,8 @@ while N_red <= (2/3*N_fir)
         matrix = zeros(num_sam,1);
         matrix(:,:) = tau;
         e_tau_ini =  gd_ini - matrix;
+        disp('inital etau')
+        disp(norm(e_tau_ini(1:round(0.4*num_sam)),inf))
         max_index = find(e_tau_ini==(max(e_tau_ini)));
         min_index = find(e_tau_ini==(min(e_tau_ini)));
         
@@ -79,8 +82,10 @@ while N_red <= (2/3*N_fir)
         IIRcoe = IIRcoe_ini;
         IIRnum = ini_num;
         IIRden = ini_den;
+        global IIRnum IIRden
         while 1
             %Solve the convex maximizing problem
+            dbstop if error
             delta_x = mosek_optimzer(0.999,IIRden);
             delta_x = transpose(delta_x);
             %calculate new performances
@@ -95,19 +100,20 @@ while N_red <= (2/3*N_fir)
             %check passband only
             c_etau = g_etau(1:round(0.4*num_sam));
             cn_etau = new_etau(1:round(0.4*num_sam));
+            
             c_dev_etau = g_dev_etau(1:round(0.4*num_sam),:);
-            if (norm(c_etau,inf) - norm(cn_etau,inf))/(norm(c_etau,inf) - norm(cn_etau+c_dev_etau*transpose(delta_x),inf)) < 0.5
+            if (norm(c_etau,2) - norm(cn_etau,2)) < 0 || (norm(c_etau,2) - norm(cn_etau,2))/(norm(c_etau,2) - norm(c_etau+c_dev_etau*transpose(delta_x),2)) < 0.3
                 rho = 0.5*rho;
                 disp('situation 1');
-                disp(norm(c_etau,inf))
-                disp(norm(cn_etau,inf))
+                disp(norm(c_etau,2) - norm(cn_etau,2))
+                disp(norm(c_etau,2) - norm(cn_etau+c_dev_etau*transpose(delta_x),2))
                 IIRcoe = IIRcoe - delta_x;
             else
                 disp('situation 2');
                 IIRnum = new_num;
                 IIRden = new_den;
-                disp(norm(c_etau,inf))
-                disp(norm(cn_etau,inf))
+                disp(norm(c_etau,2) - norm(cn_etau,2))
+                disp(norm(c_etau,2) - norm(cn_etau+c_dev_etau*transpose(delta_x),2))
                 rho = 1.1*rho;
                 %Get the current sensitivity map, current coeffs
                 %max_index = find(new_etau==(max(new_etau)));
@@ -153,11 +159,14 @@ while N_red <= (2/3*N_fir)
                 %stopband 0.6-1
                 end_gra_dev = Deviation_Ripple(0.6,1, 'pass',num_sam,IIRnum,IIRden,tau);
                 g_gradient_lr_stop = end_gra_dev;
-                pass_ripple = Get_ripple(0,0.4,IIRnum,IIRden);
+                pass_ripple = Get_ripple(0.1,0.3,IIRnum,IIRden);
                 stop_ripple = Get_ripple(0.6,1,IIRnum,IIRden);
                 g_lambada_p = 10^5 * pass_ripple;
                 g_lambada_s = 10^5 * stop_ripple;
-                if abs(pass_ripple-Rip_pb)<1e-4 && abs(stop_ripple-Rip_sb)<1e-4
+                disp('pass ripple')
+                disp(abs(pass_ripple-Rip_pb))
+                
+                if abs(pass_ripple-Rip_pb)<1e-2 && abs(stop_ripple-Rip_sb)<1e-2
                     IIRcoe_best = IIRcoe;
                     disp('one best coeff generated');
                     break
