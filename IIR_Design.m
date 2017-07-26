@@ -1,5 +1,4 @@
-function [ IIRcoe_best ] = IIR_Design(num_sam,tau,Rip_pb, Rip_sb) %b is the fir filter initial coe
-tau = 15;
+function [ IIRcoe_best ] = IIR_Design(num_sam,Rip_pb, Rip_sb) %b is the fir filter initial coe
 num_sam = 314;       %number of sampling points
 addpath 'c:\Program Files\mosek\7\toolbox\r2013a' 
 addpath(genpath('F:\IIR filter\YALMIP-master'))
@@ -20,9 +19,9 @@ g_stop_area = [0.6,1];
 %  may be added in later
 
 
-N_fir = 2*tau;
-N_red = 11;
 
+N_red = 10;
+global tau
 while N_red <= (2/3*N_fir)
     disp(N_red);
     rho = 0.01;
@@ -115,13 +114,7 @@ while N_red <= (2/3*N_fir)
                 disp(norm(c_etau,2) - norm(cn_etau,2))
                 disp(norm(c_etau,2) - norm(cn_etau+c_dev_etau*transpose(delta_x),2))
                 rho = 1.1*rho;
-                %Get the current sensitivity map, current coeffs
-                %max_index = find(new_etau==(max(new_etau)));
-                %min_index = find(new_etau==(min(new_etau)));
-                %s_map = get_smap(new_gra_dev_gd,max_index,min_index);
-                
-                %Call python code here.
-                %System(Python, random_dotting.py);
+               
                 
                 
                 
@@ -150,8 +143,6 @@ while N_red <= (2/3*N_fir)
                 ini_gra_dev_gd = Gra_Dev_Group_delay(IIRnum,IIRden,num_sam,e_tau,tau);
                 g_dev_etau = ini_gra_dev_gd;
 
-                %3.1 After this we import a very useful thing, sensitivity map:
-                s_map = get_smap(ini_gra_dev_gd,max_index,min_index);
                 %4 gradient of deviation of linear ripple
                 %passband 0-0.4
                 pass_gra_dev = Deviation_Ripple(0,0.4, 'pass',num_sam,IIRnum,IIRden,tau);
@@ -166,9 +157,14 @@ while N_red <= (2/3*N_fir)
                 disp('pass ripple')
                 disp(abs(pass_ripple-Rip_pb))
                 
-                if abs(pass_ripple-Rip_pb)<1e-2 && abs(stop_ripple-Rip_sb)<1e-2
+                if abs(Rip_pb-pass_ripple)<1e-2 && abs(Rip_sb-stop_ripple)<1e-2
                     IIRcoe_best = IIRcoe;
                     disp('one best coeff generated');
+                    %Get the current sensitivity map, current coeffs
+                    s_map = get_smap(new_gra_dev_gd,max_index,min_index);
+                
+                    %Call python code here.
+                    System(Python, discrete_dotting.py);
                     break
                 end
             
@@ -176,5 +172,6 @@ while N_red <= (2/3*N_fir)
         end   
     end
     N_red = N_red + 1;
+    tau = N_fir/2;
 end
 

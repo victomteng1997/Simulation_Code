@@ -16,5 +16,6 @@ for m = 1:dimension(2)
 end
 fclose(fid)
 result = 'done';
+disp('writing')
 end
 
