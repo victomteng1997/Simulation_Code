@@ -1,15 +1,23 @@
 function [ b,a ] = another_mr(order)
 global tau
-k = 15;
+k = 11;
 dev_best = 99;
-while k <= 40;
+while k <= 50;
     
     % Another model reduction method
     %   此处显示详细说明
     % test inital iir
-    f = [0 0.475  0.525 1];                   %a passband of 0.4-0.6
-    a = [0 0 1.0 1.0];
-    b = firpm(k,f,a,[100,100]);
+    
+    %
+    %method 1
+    f = [0 0.4 0.6 1];                   %a passband of 0.4-0.6
+    a = [1.0 1.0 0 0];
+    b = firpm(k,f,a,[1,100]);
+    %}
+    %method 2
+    %{
+    b = fir1(30,0.6,'high',chebwin(31,50));
+    %}
     len = length(b);
     a = zeros(1,len);
     a(1) = 1;
@@ -29,8 +37,8 @@ while k <= 40;
     gd = gd(1:200) - k/2;
     dev = max(abs(gd));
     if dev < dev_best
-        k
-        dev_best = dev
+        k;
+        dev_best = dev;
         b_best = b;
         a_best = a;
     end;
@@ -47,6 +55,8 @@ while k <= 40;
     
     k = k+1;
 end  
+b_best
+a_best
 [h,w] = freqz(b_best,a_best,'whole',2001);
 plot(w/pi,20*log10(abs(h)))
 xlabel('Normalized Frequency (\times\pi rad/sample)')
